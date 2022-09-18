@@ -4,9 +4,9 @@ Coursera Pratical Machine Learning Assigment
 
 ***
 
-The project Final report can be found on this repo at [https://github.com/Protospi/IOT-Exercises/edit/main/finalProject.html](https://github.com/Protospi/IOT-Exercises/edit/main/finalProject.html)
+The project Final report can be found on this repo at [Git path](https://github.com/Protospi/IOT-Exercises/blob/main/finalProject.pdf)
 
-Shiny Interactive Exploratory Data Analysis: [https://loes.shinyapps.io/finalProject_shiny/](https://loes.shinyapps.io/finalProject_shiny/)
+Shiny Interactive Exploratory Data Analysis: [shinyapps.io/finalProject_shiny](https://loes.shinyapps.io/finalProject_shiny/)
 
 ***
 
