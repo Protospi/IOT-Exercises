@@ -1,0 +1,92 @@
+---
+title: "Exploratory Analysis Barbel Lifts Execution Based on IOT Devices Sensors Data"
+author: "Pedro Loes"
+date: "2022-09-18"
+output: html_document
+runtime: shiny
+---
+
+# Descriptive analysis
+
+```{r, echo =FALSE, message=FALSE, error=FALSE, cache=FALSE, warning=FALSE}
+
+# Load libraries
+library(shiny)
+library(data.table)
+library(tidyverse)
+library(naniar)
+library(caret)
+
+# Load data
+train <- fread("pml-training.csv", 
+               na.strings = c("", "NA", "NaN", "<NA>"),
+               select = 2:160) %>%  as_tibble()
+test <- fread("pml-testing.csv",
+              na.strings = c("", "NA", "NaN", "<NA>"),
+              select = 2:160) %>%  as_tibble()
+
+# Inspect and transform missing data to zero
+misses <- miss_var_summary(train)
+var_names <- misses[which(misses$pct_miss == 100), "variable"]
+training <- train %>% select(-var_names$variable) %>% replace(is.na(.), 0)
+testing <- test %>%  select(-var_names$variable) %>% replace(is.na(.), 0)
+
+# Check with any variables has var 0
+zero_vars <- names(which(apply(training, 2, var) == 0))
+training <- training %>% select(-zero_vars)
+testing <- testing %>% select(-zero_vars)
+
+# Remove unecessary variable
+data_types <- sapply(training, class) 
+categorical <- names(data_types[data_types == "character"])
+remove <- c(categorical[-4], "num_window", "raw_timestamp_part_1", "raw_timestamp_part_2")
+training <- training %>% select(-remove)
+testing <- testing %>% select(-remove)
+
+# Pre Proces center and scale data
+preProc  <- preProcess(training[-144], method = c("center", "scale"))
+training <- cbind(predict(preProc, training[-144]), training["classe"])
+testing <- predict(preProc, testing)
+
+# Input 
+fluidRow(
+    column(width = 6,
+           selectInput("feature",
+            "Feature",
+            choices = colnames(training)[-144])
+    ),
+    column(width = 6, 
+           selectInput("vision",
+            "Geometry",
+            choices = c("Boxplot", "Violin"))
+    )
+  )
+
+# Reder plot
+renderPlot({
+  
+  # Graph of variable and classes
+  p <- training %>% 
+    ggplot(aes_string(x = input$feature, y = "classe", fill = "classe")) 
+    
+  # Condition on geom
+  if(input$vision == "Boxplot"){
+    
+    p  + 
+    geom_boxplot()+
+    labs(title = paste0("Distribution of ", input$feature, " by Class"),
+         x = paste0("Standardize ", input$feature))
+    
+  } else {
+    
+    p + 
+    geom_violin()+
+    labs(title = paste0("Distribution of ", input$feature, " by Class"),
+         x = paste0("Standardize ", input$feature))
+    
+  } 
+  
+})
+
+```
+
